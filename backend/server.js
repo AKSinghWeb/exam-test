@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import morgan from 'morgan';
 import authRoutes from './routes/authRoutes.js';
 import candidateRoutes from './routes/candidateRoutes.js';
 import questionRoutes from './routes/questionRoutes.js';
@@ -20,6 +21,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(morgan('dev'))
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -32,10 +34,11 @@ app.use('/api/sets', setRoutes); // Use set routes
 app.use('/api/candidates', userRoutes);
 
 // Simple route to respond for keep-alive
-app.get('/api/keep-alive', (req, res) => {
-  console.log('Keep-alive request received');
-  res.status(200).send('Server is alive');
-});
+// app.get('/api/keep-alive', (req, res) => {
+//   console.log('Keep-alive request received');
+//   res.status(200).send('Server is alive');
+// });
+
 
 // Connect to MongoDB
 const connectDB = async () => {
@@ -48,15 +51,27 @@ const connectDB = async () => {
   }
 };
 
-// Self-ping cron job to keep the server alive
-cron.schedule('* * * * *', async () => {
-  try {
-    const response = await axios.get(`${process.env.BASE_API_URL}/api/keep-alive`);
-    console.log('Keep-alive request sent: ', response.data);
-  } catch (error) {
-    console.error('Error in keep-alive request:', error.message);
-  }
+// route for about the api
+app.get('/', (req, res) => {
+  res.send('Welcome to the API');
 });
+
+
+// Self-ping cron job to keep the server alive
+// cron.schedule('* * * * *', async () => {
+//   try {
+//     const response = await axios.get(`${process.env.BASE_API_URL}/api/keep-alive`);
+//     console.log('Keep-alive request sent: ', response.data);
+//   } catch (error) {
+//     console.error('Error in keep-alive request:', error.message);
+//   }
+// });
+
+app.use((err, req, res, next) => {
+  console.error('Error:', err)
+  res.status(500).json({ error: 'Internal Server Error' })
+  next(err)
+})
 
 // Start Server
 const PORT = process.env.PORT || 5000;

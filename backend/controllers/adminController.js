@@ -6,6 +6,8 @@ import jwt from 'jsonwebtoken';
 export const registerAdmin = async (req, res) => {
   const { email, password } = req.body;
 
+  console.log(req.body);
+
   try {
     // Check if the admin already exists
     const existingAdmin = await Admin.findOne({ email });
@@ -22,6 +24,7 @@ export const registerAdmin = async (req, res) => {
 
     res.status(201).json({ message: 'Admin registered successfully' });
   } catch (error) {
+    console.error('Error registering admin:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -48,6 +51,7 @@ export const loginAdmin = async (req, res) => {
 
     res.status(200).json({ token, adminId: admin._id });
   } catch (error) {
+    console.error('Error logging in admin:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 };
